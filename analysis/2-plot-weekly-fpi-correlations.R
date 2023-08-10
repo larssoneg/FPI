@@ -1,3 +1,6 @@
+# Load plot formatting
+source("./analysis/0-plot-formatting.R")
+
 # Load data
 fpi <- readr::read_csv("./data/weekly-fpi-2020-2022.csv")
 correlations <- readr::read_csv("./analysis/1-weekly-fpi-correlations.csv")
@@ -14,21 +17,54 @@ correlations %<>% dplyr::left_join(y = labels, by = "variable") %>%
 rho_by_week <- ggplot(data = correlations, aes(x = week, y = value, color = label)) +
 geom_point() + 
 geom_line() +
+scale_color_manual(values = colorspace::darken(fpi_colors, .35)) +
 scale_y_continuous(limits= c(-1,1), breaks = seq(-1, 1, .1)) +
-geom_hline(yintercept = 0) +
+geom_hline(yintercept = 0, linetype = "dotted") +
 scale_x_continuous(limits = c(1,18), breaks = 1:18) + 
 labs(x = "Week of Season", 
      y = "Correlation with Week 1 FPI",
-     title = "Week 1 NFL Football Power Index (FPI) Values Are Meaningful After All",
+     # title = "Week 1 NFL Football Power Index (FPI) Values Are Meaningful After All",
      # title = "ESPN NFL Football Power Index (FPI) Values Are Strongly Correlated Throughout the Season",
-     subtitle = "Correlation of Week 1 FPI with All Subsequent Weeks (2020-2022 Seasons)",
+     title = "Correlation of Week 1 FPI with All Subsequent Weeks (2020-2022 Seasons)",
      color = "FPI Series"
      ) +
-theme_bw() +
-theme(legend.position = c(.15,.65), legend.title = element_blank())
+theme_substack() +
+theme(legend.position = c(.15,.35), 
+      legend.title = element_blank(),
+      legend.text = element_text(size = 14)
+)
 
 
-# Week 1 vs. Week 17 overall FPI
+ggsave(filename = "./analysis/plots/fpi-correlations-by-week.png", plot = rho_by_week, width = 13.5, height = 11)
+
+
+# Facet version ----
+rho_by_week_facet <- ggplot(data = correlations, aes(x = week, y = value, color = label)) +
+  geom_point(size = 4) + 
+  geom_line(size = 3) +
+  facet_wrap(~label, nrow = 4) +
+  scale_color_manual(values = colorspace::darken(fpi_colors, .35)) +
+  scale_y_continuous(limits= c(-1,1), breaks = seq(-1, 1, .25)) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  scale_x_continuous(limits = c(1,18), breaks = 1:18) + 
+  labs(x = "Week of Regular Season", 
+       y = "Correlation with Week 1 FPI",
+       # title = "Week 1 NFL Football Power Index (FPI) Values Are Meaningful After All",
+       # title = "ESPN NFL Football Power Index (FPI) Values Are Strongly Correlated Throughout the Season",
+       title = "Correlation of Week 1 FPI with All Subsequent Weeks",
+       subtitle = "(2020-2022 Seasons)",
+       caption = "Note: Week 18 correlations are based on the 2022 regular season only.",
+       color = "FPI Series"
+  ) +
+  theme_substack() +
+  theme(legend.position = "none", 
+        legend.title = element_blank(),
+        legend.text = element_text(size = 14)
+  )
+
+ggsave(filename = "./analysis/plots/fpi-correlations-by-week-facet.png", plot = rho_by_week_facet, width = 13.5, height = 11)
+
+# Week 1 vs. Week 17 overall FPI ----
 fpi_by_week <- dplyr::group_split(fpi, week) %>% lapply(FUN = function(x) arrange(x, team))
 
 week1_vs_week17 <- dplyr::left_join(x = fpi_by_week[[1]], y = fpi_by_week[[17]], by = c("season", "team"))
