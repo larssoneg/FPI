@@ -1,0 +1,36 @@
+---
+title: "Untitled"
+author: "Erik Larsson"
+date: "8/12/2023"
+output: pdf_document
+header-includes:
+  - \usepackage{booktabs}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r cars}
+set.seed(1) 
+
+table_data <- readr::read_csv(file = "../data/weekly-fpi-2020-2022.csv") %>%
+dplyr::filter(season == 2022 & week == 1) %>%
+dplyr::sample_n(size = 5) %>%
+dplyr::select(season, week, team, fpi, off, def, st) %>%
+arrange(desc(fpi))
+
+
+
+knitr::kable(table_data,format = "latex", 
+              booktabs = T,
+             caption = "A Look at Week 1 FPI Values from the 2022 Season",  
+             digits = 2, 
+             align = "c", row.names = F,
+             col.names = c("Season", "Week", "Team", "Overall", "Offensive", "Defensive", "Special Teams") 
+) %>%
+kableExtra::kable_styling(font_size = 13)
+
+```
+

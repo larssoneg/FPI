@@ -1,0 +1,31 @@
+---
+title: "Untitled"
+author: "Erik Larsson"
+date: "8/12/2023"
+output: pdf_document
+header-includes:
+  - \usepackage{booktabs}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r cars}
+
+table_data <- readr::read_csv(file = "./4-fpi-prediction-diagnostics.csv")
+
+
+dplyr::select(table_data, season, rmse, range, n_preds) %>%
+arrange(desc(season)) %>%
+knitr::kable(format = "latex", 
+              booktabs = T,
+             caption = "The Typical Prediction Error in 2022 is Large Relative to the Range of Overall FPI Data",  
+             digits = 2, 
+             align = "c", row.names = F,
+             col.names = c("Season", "Typical Prediction Error for Overall FPI", "Range of Overall FPI Data", "Number of Predictions") 
+)
+
+```
+
